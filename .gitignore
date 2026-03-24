@@ -103,3 +103,6 @@ InitTestScene*.unity*
 /[Aa]ssets/GoogleService-Info.plist
 /[Aa]ssets/Firebase/m_artifacts/
 /[Aa]ssets/Firebase/
+
+# Firebase configuration
+Assets/Plugins/Android/FirebaseApp.androidlib/res/values/google-services.xml
