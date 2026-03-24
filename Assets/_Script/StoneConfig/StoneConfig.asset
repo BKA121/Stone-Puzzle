@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f25a221fb3c5a3439b9cf7bb2f51d27, type: 3}
+  m_Name: StoneConfig
+  m_EditorClassIdentifier: 
+  allStones:
+  - type: 0
+    stonePrefab: {fileID: 737623407768884101, guid: 9074b2643b5aca54d973be3c93ba7ef9, type: 3}
+  - type: 1
+    stonePrefab: {fileID: 3800489855361506724, guid: 72908c6ca789ce04187c81f5f7915604, type: 3}
+  - type: 2
+    stonePrefab: {fileID: 9011962500049531073, guid: 2c09a5a760fb30b4a8117c288144ec7e, type: 3}
+  - type: 3
+    stonePrefab: {fileID: 3358508539123291614, guid: db009ec76fe8d9c46bc20acbd62d26d6, type: 3}
+  - type: 4
+    stonePrefab: {fileID: 7223035616040858899, guid: 616e0f8aba201274b90dc95a8e799e55, type: 3}
+  - type: 5
+    stonePrefab: {fileID: 4638265811972818791, guid: 1dc08da957991004fb92f98ce1fe2c86, type: 3}
+  - type: 6
+    stonePrefab: {fileID: 8361815379053053827, guid: e406e67ff3394c84880c8a34e8e80833, type: 3}
+  - type: 7
+    stonePrefab: {fileID: 7786634953100315083, guid: 571058a93bd2c524da38323d775a8814, type: 3}
+  - type: 8
+    stonePrefab: {fileID: 4144712037451727405, guid: dbf776b2a0f649f4c9e2d7927213fdeb, type: 3}
+  - type: 9
+    stonePrefab: {fileID: 1920237934802870904, guid: 87090f2e3083cbe438b91cbcc4eb92a1, type: 3}
+  - type: 10
+    stonePrefab: {fileID: 7804393313198720162, guid: fe228b06252cf3e45bf51d3a3dfa29e0, type: 3}
+  - type: 11
+    stonePrefab: {fileID: 6422128959237658496, guid: bbee379126923394580e82210d046621, type: 3}
+  - type: 12
+    stonePrefab: {fileID: 8457281867983737154, guid: 9e99164c08fe6d043a299f5f2613d757, type: 3}
+  - type: 13
+    stonePrefab: {fileID: 7518962320203560422, guid: b3c9198579e0d494e87b8b5e618687d5, type: 3}
+  - type: 14
+    stonePrefab: {fileID: 4035898392432636659, guid: df142a50ec4d187499b22041f8d59a49, type: 3}
+  - type: 15
+    stonePrefab: {fileID: 3852657288360443128, guid: 22cbfe0964d12b34b8e32d7db6915853, type: 3}
+  - type: 16
+    stonePrefab: {fileID: 5903462484715519660, guid: 31ee0704b97966a4082d238ee0e3e444, type: 3}
