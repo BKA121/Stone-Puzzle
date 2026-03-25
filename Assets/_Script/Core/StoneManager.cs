@@ -17,9 +17,16 @@ public class StoneManager : MonoBehaviour
     private int _row;
     private int _column;
 
+    public static StoneManager Instance { get; private set; }
     public Stone[,] boardStone;
     public StonePoolManager stonePoolManager;
     public StoneConfig stoneConfig;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) Destroy(this.gameObject);
+        else Instance = this;
+    }
 
     public void InitLevel(LevelData levelData)
     {
@@ -29,6 +36,7 @@ public class StoneManager : MonoBehaviour
         SpawnStoneForNewGame(levelData.positionIceList, levelData.normalStone);
     }
 
+    // Spawn stone
     public void SpawnStoneForNewGame(List<(int r, int c)> positionIceList, List<StoneType> normalStone)
     {
         foreach (var pos in positionIceList)
@@ -36,8 +44,6 @@ public class StoneManager : MonoBehaviour
             GameObject ice = GameObject.Instantiate(stoneConfig.GetStoneByType(StoneType.Ice), this.transform);
             ice.transform.localPosition = new Vector2(pos.c, pos.r);
             Stone stone = ice.GetComponent<Stone>();
-            stone.c = pos.c;
-            stone.r = pos.r;
             stone.type = StoneType.Ice;
             boardStone[pos.r, pos.c] = stone;
         }
@@ -63,12 +69,11 @@ public class StoneManager : MonoBehaviour
                 stone.transform.SetParent(this.transform);
                 stone.transform.localPosition = new Vector2(c, r);
                 Stone stoneScript = stone.GetComponent<Stone>();
-                stoneScript.r = r; stoneScript.c = c; stoneScript.type = type;
+                stoneScript.type = type;
                 boardStone[r, c] = stoneScript;
             }
         }
     }
-
     public bool IsPositionValid(int r, int c, StoneType type)
     {
         if (r < 2 && c < 2) return true;
@@ -76,6 +81,45 @@ public class StoneManager : MonoBehaviour
                    && boardStone[r, c - 2].type == type) return false;
         if (r >= 2 && boardStone[r - 1, c].type == type
                    && boardStone[r - 2, c].type == type) return false;
+        return true;
+    }
+
+    // Swap stone
+    public void SwapStone(int ra, int ca, int rb, int cb)
+    {
+        Stone stoneA = boardStone[ra, ca];
+        Stone stoneB = boardStone[rb, cb];
+
+        boardStone[ra, ca] = stoneB;
+        boardStone[rb, cb] = stoneA;
+
+        StartCoroutine(SmoothMove(stoneA, stoneB, 0.2f));
+    }
+    public IEnumerator SmoothMove(Stone s1, Stone s2, float duration)
+    {
+        Vector3 start1 = s1.transform.position;
+        Vector3 start2 = s2.transform.position;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float p = elapsed / duration;
+            float curve = p * p * (3f - 2f * p); 
+
+            s1.transform.position = Vector3.Lerp(start1, start2, curve);
+            s2.transform.position = Vector3.Lerp(start2, start1, curve);
+
+            yield return null;
+        }
+        s1.transform.position = start2;
+        s2.transform.position = start1;
+    }
+    public bool CheckStoneBeforeSwap(int r, int c)
+    {
+        if (r < 0 || r >= _row/2 || c < 0 || c >= _column) return false;
+        if (boardStone[r, c] == null) return false;
+        if (boardStone[r, c].type == StoneType.Ice) return false;
         return true;
     }
 }
