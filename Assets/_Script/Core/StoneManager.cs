@@ -12,11 +12,17 @@ public enum StoneType
     RedMatchTorL, GreenMatchTorL, BlueMatchTorL, PurpleMatchTorL, YellowMatchTorL, StoneMatch5
 }
 
+public enum StateBoard
+{
+    none, isSwapping
+}
+
 public class StoneManager : MonoBehaviour
 {
     private int _row;
     private int _column;
 
+    public StateBoard curState;
     public static StoneManager Instance { get; private set; }
     public Stone[,] boardStone;
     public StonePoolManager stonePoolManager;
@@ -30,6 +36,7 @@ public class StoneManager : MonoBehaviour
 
     public void InitLevel(LevelData levelData)
     {
+        curState = StateBoard.none;
         _row = levelData.row;
         _column = levelData.column;
         boardStone = new Stone[_row, _column];
@@ -85,15 +92,33 @@ public class StoneManager : MonoBehaviour
     }
 
     // Swap stone
-    public void SwapStone(int ra, int ca, int rb, int cb)
+    public IEnumerator SwapStone(int ra, int ca, int rb, int cb)
     {
+        curState = StateBoard.isSwapping;
         Stone stoneA = boardStone[ra, ca];
         Stone stoneB = boardStone[rb, cb];
 
         boardStone[ra, ca] = stoneB;
         boardStone[rb, cb] = stoneA;
 
-        StartCoroutine(SmoothMove(stoneA, stoneB, 0.2f));
+        yield return StartCoroutine(SmoothMove(stoneA, stoneB, 0.25f));
+
+        bool matchA = CheckStoneAfterSwap(ra, ca, boardStone[ra, ca].type);
+        bool matchB = CheckStoneAfterSwap(rb, cb, boardStone[rb, cb].type);
+
+        if (!matchA && !matchB)
+        {
+            boardStone[ra, ca] = stoneA;
+            boardStone[rb, cb] = stoneB;
+
+            yield return StartCoroutine(SmoothMove(stoneB, stoneA, 0.25f));
+        }
+        else
+        {
+            Debug.Log("Match Found!");
+        }
+
+        curState = StateBoard.none;
     }
     public IEnumerator SmoothMove(Stone s1, Stone s2, float duration)
     {
@@ -114,6 +139,7 @@ public class StoneManager : MonoBehaviour
         }
         s1.transform.position = start2;
         s2.transform.position = start1;
+        curState = StateBoard.none;
     }
     public bool CheckStoneBeforeSwap(int r, int c)
     {
@@ -121,5 +147,37 @@ public class StoneManager : MonoBehaviour
         if (boardStone[r, c] == null) return false;
         if (boardStone[r, c].type == StoneType.Ice) return false;
         return true;
+    }
+    public bool CheckStoneAfterSwap(int r, int c, StoneType type)
+    {
+        int countVertical = 1; 
+
+        for (int i = r + 1; i < _row/2; i++)
+        {
+            if (boardStone[i, c] != null && boardStone[i, c].type == type) countVertical++;
+            else break; 
+        }
+        for (int i = r - 1; i >= 0; i--)
+        {
+            if (boardStone[i, c] != null && boardStone[i, c].type == type) countVertical++;
+            else break;
+        }
+        if (countVertical >= 3) return true;
+
+        int countHorizontal = 1;
+
+        for (int i = c + 1; i < _column; i++)
+        {
+            if (boardStone[r, i] != null && boardStone[r, i].type == type) countHorizontal++;
+            else break;
+        }
+        for (int i = c - 1; i >= 0; i--)
+        {
+            if (boardStone[r, i] != null && boardStone[r, i].type == type) countHorizontal++;
+            else break;
+        }
+        if (countHorizontal >= 3) return true;
+
+        return false;
     }
 }

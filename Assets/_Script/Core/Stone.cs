@@ -40,7 +40,7 @@ public class Stone : MonoBehaviour
         if(StoneManager.Instance.CheckStoneBeforeSwap(r, c) && 
            StoneManager.Instance.CheckStoneBeforeSwap(r + dr, c + dc))
         {
-            StoneManager.Instance.SwapStone(r, c, r + dr, c + dc);
+            StartCoroutine(StoneManager.Instance.SwapStone(r, c, r + dr, c + dc));
         }
     }
 }
