@@ -34,4 +34,8 @@ public class StonePoolManager : MonoBehaviour
         return poolDict[type].GetOutOfPool();
     }
 
+    public void ReturnStoneByType(StoneType type, GameObject stone)
+    {
+        poolDict[type].ReturnPool(stone);
+    }
 }

@@ -17,6 +17,7 @@ public class Stone : MonoBehaviour
     }
     void OnMouseUp()
     {
+        if (StoneManager.Instance.curState != StateBoard.none) return; 
         _endPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         if (Vector2.Distance(_startPos, _endPos) < 0.5f) return;

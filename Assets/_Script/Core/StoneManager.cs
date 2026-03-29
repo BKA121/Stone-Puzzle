@@ -14,13 +14,21 @@ public enum StoneType
 
 public enum StateBoard
 {
-    none, isSwapping
+    none, isSwapping, isFindMatch
+}
+
+public enum MatchType
+{
+    none, match3, match4, match5, matchTorL
 }
 
 public class StoneManager : MonoBehaviour
 {
     private int _row;
     private int _column;
+    private MatchFinder _matchFinder;
+    private ProcessMatch _processMatch;
+    private int countMatch;
 
     public StateBoard curState;
     public static StoneManager Instance { get; private set; }
@@ -41,6 +49,9 @@ public class StoneManager : MonoBehaviour
         _column = levelData.column;
         boardStone = new Stone[_row, _column];
         SpawnStoneForNewGame(levelData.positionIceList, levelData.normalStone);
+
+        _matchFinder = new MatchFinder(_row, _column);
+        _processMatch = new ProcessMatch();
     }
 
     // Spawn stone
@@ -103,22 +114,20 @@ public class StoneManager : MonoBehaviour
 
         yield return StartCoroutine(SmoothMove(stoneA, stoneB, 0.25f));
 
-        bool matchA = CheckStoneAfterSwap(ra, ca, boardStone[ra, ca].type);
-        bool matchB = CheckStoneAfterSwap(rb, cb, boardStone[rb, cb].type);
+        //bool matchA = CheckStoneAfterSwap(ra, ca, boardStone[ra, ca].type);
+        //bool matchB = CheckStoneAfterSwap(rb, cb, boardStone[rb, cb].type);
 
-        if (!matchA && !matchB)
-        {
-            boardStone[ra, ca] = stoneA;
-            boardStone[rb, cb] = stoneB;
+        //if (!matchA && !matchB)
+        //{
+        //    boardStone[ra, ca] = stoneA;
+        //    boardStone[rb, cb] = stoneB;
 
-            yield return StartCoroutine(SmoothMove(stoneB, stoneA, 0.25f));
-        }
-        else
-        {
-            Debug.Log("Match Found!");
-        }
-
-        curState = StateBoard.none;
+        //    yield return StartCoroutine(SmoothMove(stoneB, stoneA, 0.25f));
+        //}
+        //else
+        //{
+            StartCoroutine(HandleCore());
+        //}
     }
     public IEnumerator SmoothMove(Stone s1, Stone s2, float duration)
     {
@@ -179,5 +188,26 @@ public class StoneManager : MonoBehaviour
         if (countHorizontal >= 3) return true;
 
         return false;
+    }
+
+    // Core game
+    public IEnumerator HandleCore()
+    {
+        do
+        {
+            // Find match
+            List<MatchGroup> allMatches = _matchFinder.FindAllMatches(boardStone);
+            countMatch = allMatches.Count;
+            if (countMatch == 0) break;
+
+            // Process match and update target stone
+            _processMatch.DestroyMatch(allMatches, stonePoolManager, boardStone);
+
+            // Refill board
+
+            // Fall stone
+
+            yield return null;
+        } while (countMatch > 0); // Con match
     }
 }
