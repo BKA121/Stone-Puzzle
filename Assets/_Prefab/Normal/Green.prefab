@@ -99,8 +99,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  r: 0
-  c: 0
 --- !u!58 &-6877382620409185262
 CircleCollider2D:
   m_ObjectHideFlags: 0

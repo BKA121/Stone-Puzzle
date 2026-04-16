@@ -8,11 +8,13 @@ public class MatchFinder
 {
     private int _row;
     private int _column;
+    private Stone[,] _boardStone;
 
-    public MatchFinder(int row, int column)
+    public MatchFinder(int row, int column, Stone[,] boardStone)
     {
         _row = row;
         _column = column;
+        _boardStone = boardStone;
     }
 
     public MatchType GetMatchType(int length)
@@ -23,7 +25,7 @@ public class MatchFinder
         return MatchType.none;
     }
 
-    public List<MatchGroup> FindAllMatches(Stone[,] boardStone)
+    public List<MatchGroup> FindAllMatches()
     {
         var allMatches = new List<MatchGroup>();
 
@@ -32,17 +34,17 @@ public class MatchFinder
         {
             for (int c = 0; c < _column; c++)
             {
-                if (boardStone[r, c] == null || boardStone[r, c].type == StoneType.Ice
-                    || boardStone[r, c].type == StoneType.StoneMatch5) continue;
+                if (_boardStone[r, c] == null || _boardStone[r, c].type == StoneType.Ice
+                    || _boardStone[r, c].type == StoneType.StoneMatch5) continue;
 
-                Stone curStone = boardStone[r, c];
+                Stone curStone = _boardStone[r, c];
                 List<Stone> horizontalMatch = new List<Stone> { curStone };
 
                 for (int k = c + 1; k < _column; k++)
                 {
-                    if (boardStone[r, k] != null && boardStone[r, k].type == curStone.type)
+                    if (_boardStone[r, k] != null && _boardStone[r, k].type == curStone.type)
                     {
-                        horizontalMatch.Add(boardStone[r, k]);
+                        horizontalMatch.Add(_boardStone[r, k]);
                     }
                     else break;
                 }
@@ -61,17 +63,17 @@ public class MatchFinder
         {
             for (int r = 0; r < _row/2; r++)
             {
-                if (boardStone[r, c] == null || boardStone[r, c].type == StoneType.Ice
-                    || boardStone[r, c].type == StoneType.StoneMatch5) continue;
+                if (_boardStone[r, c] == null || _boardStone[r, c].type == StoneType.Ice
+                    || _boardStone[r, c].type == StoneType.StoneMatch5) continue;
 
-                Stone curStone = boardStone[r, c];
+                Stone curStone = _boardStone[r, c];
                 List<Stone> verticalMatch = new List<Stone> { curStone };
 
                 for (int k = r + 1; k < _row/2; k++)
                 {
-                    if (boardStone[k, c] != null && boardStone[k, c].type == curStone.type)
+                    if (_boardStone[k, c] != null && _boardStone[k, c].type == curStone.type)
                     {
-                        verticalMatch.Add(boardStone[k, c]);
+                        verticalMatch.Add(_boardStone[k, c]);
                     }
                     else break;
                 }
