@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,8 +30,8 @@ public class PathCaculator
                     movePath = new MovePathOfStone(stone);
                     stonePathMap.Add(stone, movePath);
                 }
-                int curRow = (int)stone.transform.localPosition.y;
-                int curCol = (int)stone.transform.localPosition.x;
+                int curRow = stone.r;
+                int curCol = stone.c;
                 int fallDistance = 0;
                 for (int r = curRow - 1; r >= 0; r--)
                 {
@@ -97,6 +97,7 @@ public class PathCaculator
                         canMove = true;
                     }
                 }
+                stone.r = curRow; stone.c = curCol;
             }
         }
 

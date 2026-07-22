@@ -33,13 +33,14 @@ public class StonePool
     public GameObject GetOutOfPool()
     {
         GameObject obj = _pool.Dequeue();
-        obj.SetActive(true);
+        //obj.SetActive(true);
         return obj;
     }
 
     public void ReturnPool(GameObject obj)
     {
         obj.SetActive(false);
+        obj.transform.SetParent(_parent);
         _pool.Enqueue(obj);
     }
 }

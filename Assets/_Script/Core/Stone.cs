@@ -9,6 +9,8 @@ public class Stone : MonoBehaviour
     private Vector2 _endPos;
 
     public StoneType type;
+    public int r;
+    public int c;
 
     // Tinh toan swap stone
     void OnMouseDown()
@@ -43,5 +45,11 @@ public class Stone : MonoBehaviour
         {
             StartCoroutine(StoneManager.Instance.SwapStone(r, c, r + dr, c + dc));
         }
+    }
+
+    public void Explode(StonePoolManager stonePoolManager, Stone[,] boardStone)
+    {
+        stonePoolManager.ReturnStoneByType(type, this.gameObject);
+        boardStone[r, c] = null;
     }
 }

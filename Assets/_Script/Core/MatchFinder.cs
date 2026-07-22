@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +81,7 @@ public class MatchFinder
                 if (verticalMatch.Count >= 3)
                 {
                     allMatches.Add(new MatchGroup(verticalMatch, GetMatchType(verticalMatch.Count)));
-                    r += verticalMatch.Count - 1; // bo qua stone trong match
+                    r += verticalMatch.Count - 1; 
                 }
             }
         }
@@ -94,7 +94,6 @@ public class MatchFinder
         List<MatchGroup> finalMatches = new List<MatchGroup>();
         HashSet<Stone> usedStones = new HashSet<Stone>();
 
-        // Uu tien match5 truoc
         var match5s = allMatches.Where(m => m.matchType == MatchType.match5).ToList();
         foreach (var m5 in match5s)
         {
@@ -103,7 +102,6 @@ public class MatchFinder
         }
 
         var match4s = allMatches.Where(m => m.matchType == MatchType.match4).ToList();
-        List<MatchGroup> validMatch4s = new List<MatchGroup>();
 
         foreach (var m4 in match4s)
         {
@@ -111,12 +109,16 @@ public class MatchFinder
 
             if (cleanM4.Count == 4)
             {
-                validMatch4s.Add(new MatchGroup(cleanM4, MatchType.match4));
+                var validM4 = new MatchGroup(cleanM4, MatchType.match4);
+                finalMatches.Add(validM4);
+
+                foreach (var s in validM4.matchGroup) usedStones.Add(s);
             }
         }
 
         var match3s = allMatches.Where(m => m.matchType == MatchType.match3).ToList();
-        List<MatchGroup> candidatesForMerge = new List<MatchGroup>(validMatch4s);
+
+        List<MatchGroup> candidatesForMerge = new List<MatchGroup>();
 
         foreach (var m3 in match3s)
         {
@@ -133,19 +135,27 @@ public class MatchFinder
         {
             if (processedIndices.Contains(i)) continue;
 
+            var validStonesI = candidatesForMerge[i].matchGroup.Where(s => !usedStones.Contains(s)).ToList();
+            if (validStonesI.Count < 3) continue;
+
             bool merged = false;
             for (int j = i + 1; j < candidatesForMerge.Count; j++)
             {
                 if (processedIndices.Contains(j)) continue;
 
-                // Kiem tra giao diem
-                var intersection = candidatesForMerge[i].matchGroup.Intersect(candidatesForMerge[j].matchGroup);
+                var validStonesJ = candidatesForMerge[j].matchGroup.Where(s => !usedStones.Contains(s)).ToList();
+                if (validStonesJ.Count < 3) continue;
+
+                var intersection = validStonesI.Intersect(validStonesJ);
                 if (intersection.Any())
                 {
-                    var combinedStones = new HashSet<Stone>(candidatesForMerge[i].matchGroup);
-                    combinedStones.UnionWith(candidatesForMerge[j].matchGroup);
+                    var combinedStones = new HashSet<Stone>(validStonesI);
+                    combinedStones.UnionWith(validStonesJ);
 
                     finalMatches.Add(new MatchGroup(combinedStones.ToList(), MatchType.matchTorL));
+
+                    foreach (var s in combinedStones) usedStones.Add(s);
+
                     processedIndices.Add(i);
                     processedIndices.Add(j);
                     merged = true;
@@ -155,8 +165,8 @@ public class MatchFinder
 
             if (!merged)
             {
-                finalMatches.Add(candidatesForMerge[i]);
-                foreach (var s in candidatesForMerge[i].matchGroup) usedStones.Add(s);
+                finalMatches.Add(new MatchGroup(validStonesI, MatchType.match3));
+                foreach (var s in validStonesI) usedStones.Add(s);
             }
         }
 

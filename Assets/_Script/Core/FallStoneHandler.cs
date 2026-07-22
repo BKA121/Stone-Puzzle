@@ -8,18 +8,19 @@ public class FallStoneHandler : MonoBehaviour
 
     public int countStoneFall = 0;
 
-    public IEnumerator FallAllStone(List<MovePathOfStone> allMovePathOfStone)
+    public void FallAllStone(List<MovePathOfStone> allMovePathOfStone)
     {
         foreach(var path in allMovePathOfStone)
         {
+            countStoneFall++;
             StartCoroutine(FallStone(path.stone, path.movePath));
-            yield return null;
+            
         }
     }
 
     public IEnumerator FallStone(Stone stone, List<(int row, int col)> movePath)
     {
-        countStoneFall++;
+        //countStoneFall++;
         foreach (var pos in movePath)
         {
             Vector3 target = new Vector3(pos.col, pos.row, 0);

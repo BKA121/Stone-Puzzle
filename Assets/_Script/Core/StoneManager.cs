@@ -24,11 +24,11 @@ public enum MatchType
 
 public class StoneManager : MonoBehaviour
 {
-    private int _row;
-    private int _column;
+    public int row;
+    public int column;
     private List<StoneType> _normalStone;
     private MatchFinder _matchFinder;
-    private ExplosionHandler _explosionHandler;
+    private MatchProcesser _matchProcesser;
     private PathCaculator _pathCaculator;
     private int countMatch;
 
@@ -48,15 +48,15 @@ public class StoneManager : MonoBehaviour
     public void InitLevel(LevelData levelData)
     {
         curState = StateBoard.none;
-        _row = levelData.row;
-        _column = levelData.column;
-        boardStone = new Stone[_row, _column];
+        row = levelData.row;
+        column = levelData.column;
+        boardStone = new Stone[row, column];
         _normalStone = levelData.normalStone;
         SpawnStoneForNewGame(levelData.positionIceList);
 
-        _matchFinder = new MatchFinder(_row, _column, boardStone);
-        _explosionHandler = new ExplosionHandler(stonePoolManager, boardStone);
-        _pathCaculator = new PathCaculator(_row, _column, boardStone);
+        _matchFinder = new MatchFinder(row, column, boardStone);
+        _matchProcesser = new MatchProcesser(stonePoolManager, boardStone);
+        _pathCaculator = new PathCaculator(row, column, boardStone);
     }
 
     // Spawn stone
@@ -67,13 +67,15 @@ public class StoneManager : MonoBehaviour
             GameObject ice = GameObject.Instantiate(stoneConfig.GetStoneByType(StoneType.Ice), this.transform);
             ice.transform.localPosition = new Vector2(pos.c, pos.r);
             Stone stone = ice.GetComponent<Stone>();
+            stone.r = pos.r;
+            stone.c = pos.c;
             stone.type = StoneType.Ice;
             boardStone[pos.r, pos.c] = stone;
         }
 
-        for (int r = 0; r < _row; r++)
+        for (int r = 0; r < row; r++)
         {
-            for (int c = 0; c < _column; c++)
+            for (int c = 0; c < column; c++)
             {
                 if (boardStone[r, c] != null) continue;
                 List<StoneType> availableStone = new List<StoneType>(_normalStone);
@@ -92,6 +94,9 @@ public class StoneManager : MonoBehaviour
                 stone.transform.SetParent(this.transform);
                 stone.transform.localPosition = new Vector2(c, r);
                 Stone stoneScript = stone.GetComponent<Stone>();
+                stone.SetActive(true);
+                stoneScript.r = r;
+                stoneScript.c = c;
                 stoneScript.type = type;
                 boardStone[r, c] = stoneScript;
             }
@@ -100,16 +105,16 @@ public class StoneManager : MonoBehaviour
     public void SpawnStoneRefillBoard()
     {
         int count = 0;
-        for(int j=0; j<_column; j++)
+        for(int j=0; j<column; j++)
         {
             count = 0;
-            for(int i=_row-1; i>=0; i--)
+            for(int i=row-1; i>=0; i--)
             {
                 if (boardStone[i, j] != null) break;
                 count++;
             }
 
-            for(int i=_row-count; i<_row; i++)
+            for(int i=row-count; i<row; i++)
             {
                 List<StoneType> availableStone = new List<StoneType>(_normalStone);
                 StoneType type = StoneType.Red;
@@ -127,10 +132,15 @@ public class StoneManager : MonoBehaviour
                 stone.transform.SetParent(this.transform);
                 stone.transform.localPosition = new Vector2(j, i);
                 Stone stoneScript = stone.GetComponent<Stone>();
+                
+                stone.SetActive(true);
+                stoneScript.r = i;
+                stoneScript.c = j;
                 stoneScript.type = type;
                 boardStone[i, j] = stoneScript;
             }
         }
+        
     }
     public bool IsPositionValid(int r, int c, StoneType type)
     {
@@ -155,7 +165,10 @@ public class StoneManager : MonoBehaviour
         Stone stoneB = boardStone[rb, cb];
 
         boardStone[ra, ca] = stoneB;
+        stoneB.r = ra; stoneB.c = ca;
+        
         boardStone[rb, cb] = stoneA;
+        stoneA.r = rb; stoneA.c = cb;
 
         yield return StartCoroutine(SmoothMove(stoneA, stoneB, 0.25f));
 
@@ -165,7 +178,10 @@ public class StoneManager : MonoBehaviour
         if (!matchA && !matchB)
         {
             boardStone[ra, ca] = stoneA;
+            stoneA.r = ra; stoneA.c = ca;
+
             boardStone[rb, cb] = stoneB;
+            stoneB.r = rb; stoneB.c = cb;
 
             yield return StartCoroutine(SmoothMove(stoneB, stoneA, 0.25f));
         }
@@ -197,7 +213,7 @@ public class StoneManager : MonoBehaviour
     }
     public bool CheckStoneBeforeSwap(int r, int c)
     {
-        if (r < 0 || r >= _row/2 || c < 0 || c >= _column) return false;
+        if (r < 0 || r >= row/2 || c < 0 || c >= column) return false;
         if (boardStone[r, c] == null) return false;
         if (boardStone[r, c].type == StoneType.Ice) return false;
         return true;
@@ -206,7 +222,7 @@ public class StoneManager : MonoBehaviour
     {
         int countVertical = 1; 
 
-        for (int i = r + 1; i < _row/2; i++)
+        for (int i = r + 1; i < row/2; i++)
         {
             if (boardStone[i, c] != null && boardStone[i, c].type == type) countVertical++;
             else break; 
@@ -220,7 +236,7 @@ public class StoneManager : MonoBehaviour
 
         int countHorizontal = 1;
 
-        for (int i = c + 1; i < _column; i++)
+        for (int i = c + 1; i < column; i++)
         {
             if (boardStone[r, i] != null && boardStone[r, i].type == type) countHorizontal++;
             else break;
@@ -246,16 +262,18 @@ public class StoneManager : MonoBehaviour
             if (countMatch == 0) break;
 
             // Process match and update target stone
-            _explosionHandler.DestroyMatch(allMatches);
+            _matchProcesser.ProcessMatch(allMatches);
 
             // Fall stone
             List<MovePathOfStone> allMovePathOfStone = _pathCaculator.GetMovePathOfStones();
-            StartCoroutine(fallStoneHandler.FallAllStone(allMovePathOfStone));
-            while(fallStoneHandler.countStoneFall != 0) yield return null;
+            fallStoneHandler.FallAllStone(allMovePathOfStone);
+            while(fallStoneHandler.countStoneFall != 0)
+            {
+                yield return null;
+            }
 
             // Refill board
             SpawnStoneRefillBoard();
-
         } while (countMatch > 0);
     }
 }
