@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FallStoneHandler : MonoBehaviour
 {
-    private float _fallSpeed = 5f;
+    private float _fallSpeed = 6.5f;
 
     public int countStoneFall = 0;
 

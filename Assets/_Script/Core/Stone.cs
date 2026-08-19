@@ -11,6 +11,7 @@ public class Stone : MonoBehaviour
     public StoneType type;
     public int r;
     public int c;
+    public bool isHorizontal;
 
     // Tinh toan swap stone
     void OnMouseDown()
@@ -45,11 +46,5 @@ public class Stone : MonoBehaviour
         {
             StartCoroutine(StoneManager.Instance.SwapStone(r, c, r + dr, c + dc));
         }
-    }
-
-    public void Explode(StonePoolManager stonePoolManager, Stone[,] boardStone)
-    {
-        stonePoolManager.ReturnStoneByType(type, this.gameObject);
-        boardStone[r, c] = null;
     }
 }

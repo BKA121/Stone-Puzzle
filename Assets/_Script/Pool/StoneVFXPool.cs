@@ -1,16 +1,15 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StonePool
+public class StoneVFXPool 
 {
-    private StoneType _type;
+    private StoneVFXType _type;
     private GameObject _prefab;
     private Transform _parent;
     private Queue<GameObject> _pool = new Queue<GameObject>();
 
-    public StonePool(StoneType type, GameObject prefab, int sizePool, Transform parent)
+    public StoneVFXPool(StoneVFXType type, GameObject prefab, int sizePool, Transform parent)
     {
         _type = type;
         _prefab = prefab;
@@ -18,29 +17,23 @@ public class StonePool
 
         for (int i = 0; i < sizePool; i++)
         {
-            CreateNewStone();
+            CreateNewStoneVFX();
         }
     }
 
-    private void CreateNewStone()
+    private void CreateNewStoneVFX()
     {
         GameObject obj = GameObject.Instantiate(_prefab, _parent);
         obj.SetActive(false);
         _pool.Enqueue(obj);
     }
 
-    public Stone GetOutOfPool(int r, int c)
+    public GameObject GetOutOfPool()
     {
-        GameObject stoneObj = _pool.Dequeue();
-        stoneObj.transform.SetParent(StoneManager.Instance.transform);
-        stoneObj.transform.localPosition = new Vector2(c, r);
-        Stone stoneScript = stoneObj.GetComponent<Stone>();
+        GameObject stoneVFXObj = _pool.Dequeue();
         
-        stoneScript.r = r;
-        stoneScript.c = c;
-        stoneScript.type = _type;
-        stoneObj.SetActive(true);
-        return stoneScript;
+        stoneVFXObj.SetActive(true);
+        return stoneVFXObj;
     }
 
     public void ReturnPool(GameObject obj)
@@ -49,4 +42,5 @@ public class StonePool
         obj.transform.SetParent(_parent);
         _pool.Enqueue(obj);
     }
+
 }

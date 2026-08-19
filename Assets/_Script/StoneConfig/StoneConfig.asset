@@ -47,3 +47,12 @@ MonoBehaviour:
     stonePrefab: {fileID: 3852657288360443128, guid: 22cbfe0964d12b34b8e32d7db6915853, type: 3}
   - type: 16
     stonePrefab: {fileID: 5903462484715519660, guid: 31ee0704b97966a4082d238ee0e3e444, type: 3}
+  allStoneVFX:
+  - type: 0
+    stoneVFXPrefab: {fileID: 1391067979114164648, guid: f77bb4d6ba696c84b9dbd583b5b94aef, type: 3}
+  - type: 1
+    stoneVFXPrefab: {fileID: 3161143233137931920, guid: 6a4dbefad47ca7b4b8fb5d54e02348db, type: 3}
+  - type: 2
+    stoneVFXPrefab: {fileID: 8593296521138373412, guid: 936eb425ae760ee4d8f0979a03cc2367, type: 3}
+  - type: 3
+    stoneVFXPrefab: {fileID: 8593296521138373412, guid: a20d6ef008a1456459cf74b1225bb880, type: 3}

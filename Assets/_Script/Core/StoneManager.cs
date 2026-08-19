@@ -12,6 +12,11 @@ public enum StoneType
     RedMatchTorL, GreenMatchTorL, BlueMatchTorL, PurpleMatchTorL, YellowMatchTorL, StoneMatch5
 }
 
+public enum StoneVFXType
+{
+    BaseExplosion, Match4Explosion, LightVertical, LightHorizontal
+}
+
 public enum StateBoard
 {
     none, isSwapping
@@ -30,6 +35,8 @@ public class StoneManager : MonoBehaviour
     private MatchFinder _matchFinder;
     private MatchProcesser _matchProcesser;
     private PathCaculator _pathCaculator;
+    private StoneExplosionManager _stoneExplosionManager;
+    private StoneVFXManager _stoneVFXManager;
     private int countMatch;
 
     public FallStoneHandler fallStoneHandler;
@@ -38,6 +45,7 @@ public class StoneManager : MonoBehaviour
     public Stone[,] boardStone;
     public StonePoolManager stonePoolManager;
     public StoneConfig stoneConfig;
+    public Transform StoneVFX;
 
     private void Awake()
     {
@@ -54,9 +62,11 @@ public class StoneManager : MonoBehaviour
         _normalStone = levelData.normalStone;
         SpawnStoneForNewGame(levelData.positionIceList);
 
-        _matchFinder = new MatchFinder(row, column, boardStone);
+        _matchFinder = new MatchFinder(row, column, boardStone, this);
         _matchProcesser = new MatchProcesser(stonePoolManager, boardStone);
         _pathCaculator = new PathCaculator(row, column, boardStone);
+        _stoneVFXManager = new StoneVFXManager(stonePoolManager, StoneVFX, row, column);
+        _stoneExplosionManager = new StoneExplosionManager(stonePoolManager, boardStone, _stoneVFXManager);
     }
 
     // Spawn stone
@@ -90,15 +100,8 @@ public class StoneManager : MonoBehaviour
                     }
                     else break;
                 }
-                GameObject stone = stonePoolManager.GetStoneByType(type);
-                stone.transform.SetParent(this.transform);
-                stone.transform.localPosition = new Vector2(c, r);
-                Stone stoneScript = stone.GetComponent<Stone>();
-                stone.SetActive(true);
-                stoneScript.r = r;
-                stoneScript.c = c;
-                stoneScript.type = type;
-                boardStone[r, c] = stoneScript;
+
+                boardStone[r, c] = stonePoolManager.GetStoneByType(type, r, c);
             }
         }
     }
@@ -128,16 +131,8 @@ public class StoneManager : MonoBehaviour
                     }
                     else break;
                 }
-                GameObject stone = stonePoolManager.GetStoneByType(type);
-                stone.transform.SetParent(this.transform);
-                stone.transform.localPosition = new Vector2(j, i);
-                Stone stoneScript = stone.GetComponent<Stone>();
-                
-                stone.SetActive(true);
-                stoneScript.r = i;
-                stoneScript.c = j;
-                stoneScript.type = type;
-                boardStone[i, j] = stoneScript;
+
+                boardStone[i, j] = stonePoolManager.GetStoneByType(type, i, j);
             }
         }
         
@@ -155,6 +150,29 @@ public class StoneManager : MonoBehaviour
     {
         if (boardStone[r - 1, c].type == type && boardStone[r - 2, c].type == type) return false;
         return true;
+    }
+
+    public StoneType GetNormalStoneType(StoneType type)
+    {
+        return type switch
+        {
+            StoneType.RedMatch4 or StoneType.RedMatchTorL => StoneType.Red,
+            
+            StoneType.GreenMatch4 or StoneType.GreenMatchTorL => StoneType.Green,
+            
+            StoneType.BlueMatch4 or StoneType.BlueMatchTorL => StoneType.Blue,
+            
+            StoneType.PurpleMatch4 or StoneType.PurpleMatchTorL => StoneType.Purple,
+            
+            StoneType.YellowMatch4 or StoneType.YellowMatchTorL => StoneType.Yellow,
+            
+            _ => type 
+        };
+    }
+
+    public bool IsSameNormalType(StoneType type1, StoneType type2)
+    {
+        return GetNormalStoneType(type1) == GetNormalStoneType(type2);
     }
 
     // Swap stone
@@ -224,12 +242,12 @@ public class StoneManager : MonoBehaviour
 
         for (int i = r + 1; i < row/2; i++)
         {
-            if (boardStone[i, c] != null && boardStone[i, c].type == type) countVertical++;
+            if (boardStone[i, c] != null && IsSameNormalType(boardStone[i, c].type, type)) countVertical++;
             else break; 
         }
         for (int i = r - 1; i >= 0; i--)
         {
-            if (boardStone[i, c] != null && boardStone[i, c].type == type) countVertical++;
+            if (boardStone[i, c] != null && IsSameNormalType(boardStone[i, c].type, type)) countVertical++;
             else break;
         }
         if (countVertical >= 3) return true;
@@ -238,12 +256,12 @@ public class StoneManager : MonoBehaviour
 
         for (int i = c + 1; i < column; i++)
         {
-            if (boardStone[r, i] != null && boardStone[r, i].type == type) countHorizontal++;
+            if (boardStone[r, i] != null && IsSameNormalType(boardStone[r, i].type, type)) countHorizontal++;
             else break;
         }
         for (int i = c - 1; i >= 0; i--)
         {
-            if (boardStone[r, i] != null && boardStone[r, i].type == type) countHorizontal++;
+            if (boardStone[r, i] != null && IsSameNormalType(boardStone[r, i].type, type)) countHorizontal++;
             else break;
         }
         if (countHorizontal >= 3) return true;
@@ -261,8 +279,11 @@ public class StoneManager : MonoBehaviour
             countMatch = allMatches.Count;
             if (countMatch == 0) break;
 
+            yield return null;
+
             // Process match and update target stone
-            _matchProcesser.ProcessMatch(allMatches);
+            _matchProcesser.ProcessMatch(allMatches, _stoneExplosionManager);
+            yield return new WaitForSeconds(0.3f);
 
             // Fall stone
             List<MovePathOfStone> allMovePathOfStone = _pathCaculator.GetMovePathOfStones();
@@ -274,6 +295,7 @@ public class StoneManager : MonoBehaviour
 
             // Refill board
             SpawnStoneRefillBoard();
+            yield return null;
         } while (countMatch > 0);
     }
 }

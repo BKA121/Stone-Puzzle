@@ -7,30 +7,74 @@ public class MatchProcesser
 {
     private Stone[,] _boardStone;
     private StonePoolManager _stonePoolManager;
-    private readonly Dictionary<MatchType, IMatchProcess> _strategies;
 
     public MatchProcesser(StonePoolManager stonePoolManager, Stone[,] boardStone)
     {
         _boardStone = boardStone;
         _stonePoolManager = stonePoolManager;
+    }
 
-        _strategies = new Dictionary<MatchType, IMatchProcess>
+    public void ProcessMatch(List<MatchGroup> allmatches, StoneExplosionManager stoneExplosionManager)
+    {
+        List<Stone> initialStonesToExplode = new List<Stone>();
+
+        foreach(var match in allmatches)
         {
-            { MatchType.match3, new Match3() },
-            { MatchType.match4, new Match4() },
-            { MatchType.matchTorL, new MatchTorL() },
-            { MatchType.match5, new Match5() }
+            foreach(var stone in match.matchGroup)
+            {
+                initialStonesToExplode.Add(stone);
+                _boardStone[stone.r, stone.c] = null;
+            }
+
+            if(match.matchType == MatchType.match4)
+            {
+                int r = match.r;
+                int c = match.c;
+                _boardStone[r, c] = _stonePoolManager.GetStoneByType(GetMatch4StoneType(match.stoneType), r, c);
+                _boardStone[r, c].isHorizontal = match.isHorizontal;
+            }
+
+            else if(match.matchType == MatchType.matchTorL)
+            {
+                int r = match.r;
+                int c = match.c;
+                _boardStone[r, c] = _stonePoolManager.GetStoneByType(GetMatchTorLStoneType(match.stoneType), r, c);
+            }
+
+            else if(match.matchType == MatchType.match5)
+            {
+                int r = match.r;
+                int c = match.c;
+                _boardStone[r, c] = _stonePoolManager.GetStoneByType(StoneType.StoneMatch5, r, c);
+            }
+        }
+        
+        stoneExplosionManager.HandleExplode(initialStonesToExplode);
+    }
+
+    public StoneType GetMatch4StoneType(StoneType type)
+    {
+        return type switch
+        {
+            StoneType.Red => StoneType.RedMatch4,
+            StoneType.Green => StoneType.GreenMatch4,
+            StoneType.Blue => StoneType.BlueMatch4,
+            StoneType.Purple => StoneType.PurpleMatch4,
+            StoneType.Yellow => StoneType.YellowMatch4,
+            _ => type 
         };
     }
 
-    public void ProcessMatch(List<MatchGroup> allmatches)
+    public StoneType GetMatchTorLStoneType(StoneType type)
     {
-        foreach(var match in allmatches)
+        return type switch
         {
-            if (_strategies.TryGetValue(match.matchType, out var strategy))
-            {
-                strategy.Process(match, _boardStone, _stonePoolManager);
-            }
-        }
+            StoneType.Red => StoneType.RedMatchTorL,
+            StoneType.Green => StoneType.GreenMatchTorL,
+            StoneType.Blue => StoneType.BlueMatchTorL,
+            StoneType.Purple => StoneType.PurpleMatchTorL,
+            StoneType.Yellow => StoneType.YellowMatchTorL,
+            _ => type 
+        };
     }
 }
