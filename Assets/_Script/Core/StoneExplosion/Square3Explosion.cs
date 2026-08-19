@@ -35,7 +35,7 @@ public class Square3Explosion : BaseExplosionStrategy
         }
 
         result.vfxList = new List<StoneVFXType>();
-        result.vfxList.Add(StoneVFXType.BaseExplosion);
+        result.vfxList.Add(StoneVFXType.MatchTorLExplosion);
         return result;
     }
 }

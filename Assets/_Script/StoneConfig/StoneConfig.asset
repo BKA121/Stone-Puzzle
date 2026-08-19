@@ -56,3 +56,5 @@ MonoBehaviour:
     stoneVFXPrefab: {fileID: 8593296521138373412, guid: 936eb425ae760ee4d8f0979a03cc2367, type: 3}
   - type: 3
     stoneVFXPrefab: {fileID: 8593296521138373412, guid: a20d6ef008a1456459cf74b1225bb880, type: 3}
+  - type: 4
+    stoneVFXPrefab: {fileID: 3161143233137931920, guid: dd4d440b85a0d564488f99b0b215e92b, type: 3}

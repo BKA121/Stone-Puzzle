@@ -14,7 +14,7 @@ public enum StoneType
 
 public enum StoneVFXType
 {
-    BaseExplosion, Match4Explosion, LightVertical, LightHorizontal
+    BaseExplosion, Match4Explosion, LightVertical, LightHorizontal, MatchTorLExplosion
 }
 
 public enum StateBoard
@@ -283,7 +283,7 @@ public class StoneManager : MonoBehaviour
 
             // Process match and update target stone
             _matchProcesser.ProcessMatch(allMatches, _stoneExplosionManager);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.35f);
 
             // Fall stone
             List<MovePathOfStone> allMovePathOfStone = _pathCaculator.GetMovePathOfStones();
