@@ -17,7 +17,7 @@ public class StonePoolManager : MonoBehaviour
         {
             if (!poolStoneDict.ContainsKey(type))
             {
-                StonePool stonePool = new StonePool(type, stoneConfig.GetStoneByType(type), 60, this.transform);
+                StonePool stonePool = new StonePool(type, stoneConfig.GetStoneByType(type), 80, this.transform);
                 poolStoneDict.Add(type, stonePool);
             }
         }
@@ -38,7 +38,7 @@ public class StonePoolManager : MonoBehaviour
         {
             if (!poolStoneVFXDict.ContainsKey(type))
             {
-                StoneVFXPool stoneVFXPool = new StoneVFXPool(type, stoneConfig.GetStoneVFXByType(type), 50, StoneVFX);
+                StoneVFXPool stoneVFXPool = new StoneVFXPool(type, stoneConfig.GetStoneVFXByType(type), 80, StoneVFX);
                 poolStoneVFXDict.Add(type, stoneVFXPool);
             }
         }

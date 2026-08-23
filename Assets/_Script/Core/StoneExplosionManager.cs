@@ -13,6 +13,7 @@ public class StoneExplosionManager
     private BaseExplosionStrategy _lineExplosion;
     private BaseExplosionStrategy _square3Explosion;
     private BaseExplosionStrategy _iceExplosion;
+    private Match5Explosion _match5Explosion;
 
     public StoneExplosionManager(StonePoolManager stonePoolManager, Stone[,] boardStone, StoneVFXManager stoneVFXManager)
     {
@@ -24,13 +25,30 @@ public class StoneExplosionManager
         _iceExplosion = new IceExplosion();
         _lineExplosion = new LineExplosion();
         _square3Explosion = new Square3Explosion();
+        _match5Explosion = new Match5Explosion();
     }
 
-    public void HandleExplode(List<Stone> initialStones)
+    public void HandleExplode(List<Stone> initialStones, int countStoneMatch5)
     {
         Queue<Stone> queue = new Queue<Stone>();
 
-        foreach (Stone s in initialStones) queue.Enqueue(s);
+        if (countStoneMatch5 == 0)
+        {
+            foreach (Stone s in initialStones) queue.Enqueue(s);
+        }
+        else
+        {
+            Stone stoneA = initialStones[0];
+            Stone stoneB = initialStones[1];
+
+            Stone match5Stone = (stoneA.type == StoneType.StoneMatch5) ? stoneA : stoneB;
+            Stone targetStone = (match5Stone == stoneA) ? stoneB : stoneA;
+
+            _match5Explosion.SetTargetStone(targetStone);
+
+            queue.Enqueue(match5Stone); 
+            if(targetStone.type != StoneType.StoneMatch5) queue.Enqueue(targetStone);
+        }
 
         while (queue.Count > 0)
         {
@@ -72,6 +90,8 @@ public class StoneExplosionManager
 
             StoneType.Ice
                 => _iceExplosion,
+            StoneType.StoneMatch5
+                => _match5Explosion,
             _ => _normalExplosion
         };
     }

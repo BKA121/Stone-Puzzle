@@ -9,7 +9,8 @@ public enum StoneType
 {
     Red, Green, Blue, Purple, Yellow, Ice,
     RedMatch4, GreenMatch4, BlueMatch4, PurpleMatch4, YellowMatch4,
-    RedMatchTorL, GreenMatchTorL, BlueMatchTorL, PurpleMatchTorL, YellowMatchTorL, StoneMatch5
+    RedMatchTorL, GreenMatchTorL, BlueMatchTorL, PurpleMatchTorL, YellowMatchTorL, 
+    StoneMatch5
 }
 
 public enum StoneVFXType
@@ -24,7 +25,7 @@ public enum StateBoard
 
 public enum MatchType
 {
-    none, match3, match4, match5, matchTorL
+    none, match2, match3, match4, match5, matchTorL
 }
 
 public class StoneManager : MonoBehaviour
@@ -38,6 +39,7 @@ public class StoneManager : MonoBehaviour
     private StoneExplosionManager _stoneExplosionManager;
     private StoneVFXManager _stoneVFXManager;
     private int countMatch;
+    private MatchGroup _match2;
 
     public FallStoneHandler fallStoneHandler;
     public StateBoard curState;
@@ -190,10 +192,13 @@ public class StoneManager : MonoBehaviour
 
         yield return StartCoroutine(SmoothMove(stoneA, stoneB, 0.25f));
 
-        bool matchA = CheckStoneAfterSwap(ra, ca, boardStone[ra, ca].type);
-        bool matchB = CheckStoneAfterSwap(rb, cb, boardStone[rb, cb].type);
-
-        if (!matchA && !matchB)
+        if(CheckMatch2(stoneA, stoneB))
+        {
+            _match2 = new MatchGroup(new List<Stone>{stoneA, stoneB}, MatchType.match2);
+            StartCoroutine(HandleCore());
+        }
+        else if (!CheckStoneAfterSwap(ra, ca, boardStone[ra, ca].type) && 
+                 !CheckStoneAfterSwap(rb, cb, boardStone[rb, cb].type))
         {
             boardStone[ra, ca] = stoneA;
             stoneA.r = ra; stoneA.c = ca;
@@ -208,6 +213,15 @@ public class StoneManager : MonoBehaviour
             StartCoroutine(HandleCore());
         }
     }
+    private bool CheckMatch2(Stone stoneA, Stone stoneB)
+    {
+        if (stoneA.type == StoneType.StoneMatch5 || stoneB.type == StoneType.StoneMatch5) return true;
+
+        if (stoneA.type >= StoneType.RedMatch4 && stoneB.type >= StoneType.RedMatch4) return true;
+
+        return false;
+    }
+
     public IEnumerator SmoothMove(Stone s1, Stone s2, float duration)
     {
         Vector3 start1 = s1.transform.localPosition;
@@ -275,7 +289,17 @@ public class StoneManager : MonoBehaviour
         do
         {
             // Find match
-            List<MatchGroup> allMatches = _matchFinder.FindAllMatches();
+            List<MatchGroup> allMatches = new List<MatchGroup>();
+            if(_match2 == null)
+            {
+                allMatches = _matchFinder.FindAllMatches();
+            }
+            else
+            {
+                allMatches.Add(_match2);
+                _match2 = null;
+            }
+            
             countMatch = allMatches.Count;
             if (countMatch == 0) break;
 

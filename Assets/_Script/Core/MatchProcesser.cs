@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MatchProcesser
 {
+    private int _countStoneMatch5;
     private Stone[,] _boardStone;
     private StonePoolManager _stonePoolManager;
 
@@ -17,12 +18,14 @@ public class MatchProcesser
     public void ProcessMatch(List<MatchGroup> allmatches, StoneExplosionManager stoneExplosionManager)
     {
         List<Stone> initialStonesToExplode = new List<Stone>();
+        _countStoneMatch5 = 0;
 
         foreach(var match in allmatches)
         {
             foreach(var stone in match.matchGroup)
             {
                 initialStonesToExplode.Add(stone);
+                if(match.matchType == MatchType.match2 && stone.type == StoneType.StoneMatch5) _countStoneMatch5 ++;
                 _boardStone[stone.r, stone.c] = null;
             }
 
@@ -49,7 +52,7 @@ public class MatchProcesser
             }
         }
         
-        stoneExplosionManager.HandleExplode(initialStonesToExplode);
+        stoneExplosionManager.HandleExplode(initialStonesToExplode, _countStoneMatch5);
     }
 
     public StoneType GetMatch4StoneType(StoneType type)
